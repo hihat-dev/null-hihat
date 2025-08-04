@@ -53,7 +53,8 @@ def handle_connect():
 def handle_disconnect():
     logger.info(f"Client disconnected: {request.sid}")
     client_manager.remove_client(request.sid)
-    socketio.emit('client_disconnected', {'client_id': request.sid})
+
+    socketio.emit('client_disconnected', {'client_id': request.sid}, broadcast=True)
 
 
 @socketio.on('whoami')
@@ -61,18 +62,15 @@ def handle_whoami(data):
     logger.info(f"Client info received: {data}")
     client_manager.add_client(request.sid, data)
 
-    # Envia para todos os painéis conectados
     socketio.emit('client_connected', {
         'sid': request.sid,
         'info': data
-    })
+    }, broadcast=True)
 
-    # Também envia para o próprio cliente (se necessário)
     emit('client_info', {
         'client_id': request.sid,
         'info': data
     })
-
 
 @socketio.on('frame')
 def handle_frame(data):
@@ -205,11 +203,8 @@ def handle_client_warning(data):
 @socketio.on('get_clients')
 def handle_get_clients():
     clients = client_manager.get_all_clients()
-    formatted_clients = {
-        sid: client['info'] for sid, client in clients.items()
-    }
-    emit('clients_list', {'clients': formatted_clients})
-
+    formatted_clients = {sid: client['info'] for sid, client in clients.items()}
+    emit('clients_list', {'clients': formatted_clients})  # enviado só para quem pediu
 
 
 if __name__ == '__main__':
