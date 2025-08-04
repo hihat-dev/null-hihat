@@ -53,24 +53,18 @@ def handle_connect():
 def handle_disconnect():
     logger.info(f"Client disconnected: {request.sid}")
     client_manager.remove_client(request.sid)
-
-    socketio.emit('client_disconnected', {'client_id': request.sid}, to=None)
+    clients = client_manager.get_all_clients()
+    formatted_clients = {sid: client['info'] for sid, client in clients.items()}
+    socketio.emit('clients_list', {'clients': formatted_clients})
 
 
 @socketio.on('whoami')
 def handle_whoami(data):
     logger.info(f"Client info received: {data}")
     client_manager.add_client(request.sid, data)
-
-    socketio.emit('client_connected', {
-        'sid': request.sid,
-        'info': data
-    }, to=None)
-
-    emit('client_info', {
-        'client_id': request.sid,
-        'info': data
-    })
+    clients = client_manager.get_all_clients()
+    formatted_clients = {sid: client['info'] for sid, client in clients.items()}
+    socketio.emit('clients_list', {'clients': formatted_clients})
 
 @socketio.on('frame')
 def handle_frame(data):

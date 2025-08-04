@@ -97,18 +97,13 @@ class RemoteDesktopClient {
       this.connectionStatus.textContent = "Connected"
       this.connectionStatus.className = "status connected"
       this.log("Connected to server", "info")
+      this.socket.emit("get_clients") // Pede a lista inicial ao conectar
     })
 
     this.socket.on("disconnect", () => {
       this.connectionStatus.textContent = "Disconnected"
       this.connectionStatus.className = "status disconnected"
       this.log("Disconnected from server", "error")
-    })
-
-    this.socket.on("client_connected", (data) => {
-      this.clients[data.sid] = data.info
-      this.updateClientsList()
-      this.log(`Client connected: ${data.info.data?.username || "Unknown"}`, "info")
     })
 
     this.socket.on("clients_list", (data) => {
@@ -166,14 +161,23 @@ class RemoteDesktopClient {
 
     if (count === 0) {
       this.clientsList.innerHTML = '<div class="no-clients">No clients connected</div>'
+      this.noClientSelected.style.display = "block" // Mostrar mensagem "no client selected"
+      this.clientPanel.style.display = "none" // Esconder painel de controlo
+      this.selectedClient = null // Limpar cliente selecionado
       return
     }
 
     this.clientsList.innerHTML = ""
+    let selectedClientStillConnected = false
     Object.entries(this.clients).forEach(([sid, info]) => {
       const clientItem = document.createElement("div")
       clientItem.className = "client-item"
       clientItem.dataset.clientId = sid
+
+      if (sid === this.selectedClient) {
+          clientItem.classList.add("active")
+          selectedClientStillConnected = true
+      }
 
       const username = info.data?.username || "Unknown"
       const pcName = info.data?.pc_name || "Unknown PC"
@@ -186,6 +190,12 @@ class RemoteDesktopClient {
       clientItem.addEventListener("click", () => this.selectClient(sid))
       this.clientsList.appendChild(clientItem)
     })
+
+    if (!selectedClientStillConnected) {
+        this.selectedClient = null
+        this.noClientSelected.style.display = "block"
+        this.clientPanel.style.display = "none"
+    }
   }
 
   selectClient(clientId) {
