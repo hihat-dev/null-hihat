@@ -54,7 +54,7 @@ def handle_disconnect():
     logger.info(f"Client disconnected: {request.sid}")
     client_manager.remove_client(request.sid)
 
-    socketio.emit('client_disconnected', {'client_id': request.sid}, broadcast=True)
+    socketio.emit('client_disconnected', {'client_id': request.sid}, to=None)
 
 
 @socketio.on('whoami')
@@ -65,7 +65,7 @@ def handle_whoami(data):
     socketio.emit('client_connected', {
         'sid': request.sid,
         'info': data
-    }, broadcast=True)
+    }, to=None)
 
     emit('client_info', {
         'client_id': request.sid,
