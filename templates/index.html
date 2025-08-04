@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote Desktop Control Panel</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖥️ Remote Desktop Control Panel</h1>
+            <div class="status-bar">
+                <span id="connection-status" class="status disconnected">Disconnected</span>
+                <span id="clients-count">Clients: 0</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Sidebar com lista de clientes -->
+            <aside class="sidebar">
+                <h3>Connected Clients</h3>
+                <div id="clients-list" class="clients-list">
+                    <div class="no-clients">No clients connected</div>
+                </div>
+            </aside>
+
+            <!-- Área principal -->
+            <main class="main-panel">
+                <div id="no-client-selected" class="no-selection">
+                    <h2>Select a client to start</h2>
+                    <p>Choose a connected client from the sidebar to begin remote control</p>
+                </div>
+
+                <div id="client-panel" class="client-panel" style="display: none;">
+                    <!-- Controles -->
+                    <div class="controls">
+                        <div class="control-group">
+                            <h4>Stream Control</h4>
+                            <button id="toggle-stream" class="btn btn-primary">Start Stream</button>
+                            <label>
+                                Frame Delay: 
+                                <input type="range" id="frame-delay" min="0.1" max="1" step="0.1" value="0.1">
+                                <span id="delay-value">0.1s</span>
+                            </label>
+                        </div>
+
+                        <div class="control-group">
+                            <h4>File Operations</h4>
+                            <input type="text" id="directory-path" placeholder="/path/to/directory" value="C:\">
+                            <button id="browse-directory" class="btn btn-secondary">Browse</button>
+                        </div>
+
+                        <div class="control-group">
+                            <h4>Terminal</h4>
+                            <input type="text" id="terminal-input" placeholder="Enter command...">
+                            <button id="send-command" class="btn btn-secondary">Send</button>
+                        </div>
+                    </div>
+
+                    <!-- Área de visualização -->
+                    <div class="viewer">
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="screen">Screen</button>
+                            <button class="tab-btn" data-tab="files">Files</button>
+                            <button class="tab-btn" data-tab="terminal">Terminal</button>
+                        </div>
+
+                        <div class="tab-content">
+                            <!-- Tela do cliente -->
+                            <div id="screen-tab" class="tab-panel active">
+                                <div class="screen-container">
+                                    <canvas id="screen-canvas" width="800" height="600"></canvas>
+                                    <div id="no-stream" class="no-stream">
+                                        <h3>No stream active</h3>
+                                        <p>Click "Start Stream" to begin viewing the client's screen</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Explorador de arquivos -->
+                            <div id="files-tab" class="tab-panel">
+                                <div class="file-explorer">
+                                    <div class="file-path">
+                                        <span id="current-path">C:\</span>
+                                        <button id="go-back" class="btn btn-small">← Back</button>
+                                    </div>
+                                    <div id="file-list" class="file-list">
+                                        <div class="loading">Click "Browse" to load directory</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Terminal -->
+                            <div id="terminal-tab" class="tab-panel">
+                                <div class="terminal">
+                                    <div id="terminal-output" class="terminal-output"></div>
+                                    <div class="terminal-input">
+                                        <span class="prompt">$</span>
+                                        <input type="text" id="terminal-cmd" placeholder="Enter command...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Logs -->
+        <div class="logs">
+            <h4>Activity Log</h4>
+            <div id="log-output" class="log-output"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
