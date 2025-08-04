@@ -84,9 +84,10 @@ def handle_whoami(data):
         
         # Broadcast para todos os clientes web sobre novo cliente conectado
         socketio.emit('client_connected', {
-            'sid': request.sid,
-            'info': client_info
-        }, broadcast=True)
+        'sid': request.sid,
+        'info': client_info
+        }, to=None)
+
         
         logger.info(f"Client info received: {client_info}")
     except Exception as e:
