@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, request
 from flask_socketio import SocketIO, emit
 import json
 import os
@@ -63,14 +63,17 @@ def static_files(filename):
 # Eventos Socket.IO para compatibilidade com o cliente
 
 @socketio.on('connect')
-def handle_connect():
-    logger.info(f"Client connected: {request.sid}")
+def handle_connect(auth):
+    sid = request.sid  # Aqui request funciona, pois estamos dentro do contexto Flask
+    logger.info(f"Client connected: {sid}")
     emit('connected', {'status': 'connected'})
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    logger.info(f"Client disconnected: {request.sid}")
-    client_manager.remove_client(request.sid)
+    sid = request.sid
+    logger.info(f"Client disconnected: {sid}")
+    client_manager.remove_client(sid)
+
 
 @socketio.on('whoami')
 def handle_whoami(data):
