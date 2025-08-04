@@ -60,7 +60,18 @@ def handle_disconnect():
 def handle_whoami(data):
     logger.info(f"Client info received: {data}")
     client_manager.add_client(request.sid, data)
-    socketio.emit('client_info', {'client_id': request.sid, 'info': data})
+
+    # Envia para todos os painéis conectados
+    socketio.emit('client_connected', {
+        'sid': request.sid,
+        'info': data
+    })
+
+    # Também envia para o próprio cliente (se necessário)
+    emit('client_info', {
+        'client_id': request.sid,
+        'info': data
+    })
 
 
 @socketio.on('frame')
@@ -190,6 +201,15 @@ def handle_client_warning(data):
         })
     except Exception as e:
         logger.error(f"Error handling client warning: {e}")
+
+@socketio.on('get_clients')
+def handle_get_clients():
+    clients = client_manager.get_all_clients()
+    formatted_clients = {
+        sid: client['info'] for sid, client in clients.items()
+    }
+    emit('clients_list', {'clients': formatted_clients})
+
 
 
 if __name__ == '__main__':
